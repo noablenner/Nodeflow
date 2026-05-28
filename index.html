@@ -13,6 +13,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
   <style>
+    /* ─── CUSTOM CURSOR ─────────────────────────────────────── */
+    * { cursor: none !important; }
+    #cursor-dot {
+      position: fixed; top: 0; left: 0; z-index: 9999; pointer-events: none;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #d946ef;
+      box-shadow: 0 0 10px #d946ef, 0 0 20px rgba(217,70,239,.5);
+      transform: translate(-50%, -50%);
+      transition: width .15s, height .15s, background .15s;
+    }
+    #cursor-ring {
+      position: fixed; top: 0; left: 0; z-index: 9998; pointer-events: none;
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1.5px solid rgba(168,85,247,.6);
+      transform: translate(-50%, -50%);
+      transition: width .3s cubic-bezier(.16,1,.3,1), height .3s cubic-bezier(.16,1,.3,1), border-color .3s, opacity .3s;
+      opacity: 0.7;
+    }
+    body.cursor-hover #cursor-dot { width: 12px; height: 12px; background: #a855f7; box-shadow: 0 0 18px #a855f7, 0 0 40px rgba(168,85,247,.6); }
+    body.cursor-hover #cursor-ring { width: 52px; height: 52px; border-color: rgba(168,85,247,.9); opacity: 1; }
+    body.cursor-click #cursor-dot { width: 6px; height: 6px; }
+    body.cursor-click #cursor-ring { width: 28px; height: 28px; }
+
     /* ─── RESET & BASE ────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -463,6 +486,9 @@
 </head>
 <body>
 
+
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
 
 <div class="blobs">
   <div class="blob blob-1"></div>
@@ -1337,6 +1363,35 @@
   form.querySelectorAll('input, textarea, select').forEach(f => {
     f.addEventListener('input', () => { f.style.borderColor = ''; });
   });
+
+  /* ─── CUSTOM CURSOR ─── */
+  const dot  = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.left = mx + 'px';
+    dot.style.top  = my + 'px';
+  });
+
+  (function lerp() {
+    rx += (mx - rx) * 0.1;
+    ry += (my - ry) * 0.1;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(lerp);
+  })();
+
+  document.querySelectorAll('a, button, [data-mouse], .btn, .project-card, .service-card, .tech-pill').forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+  });
+
+  document.addEventListener('mousedown', () => document.body.classList.add('cursor-click'));
+  document.addEventListener('mouseup',   () => document.body.classList.remove('cursor-click'));
+  document.addEventListener('mouseleave', () => { dot.style.opacity = '0'; ring.style.opacity = '0'; });
+  document.addEventListener('mouseenter', () => { dot.style.opacity = ''; ring.style.opacity = ''; });
 </script>
 
 </body>
