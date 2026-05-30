@@ -1359,7 +1359,7 @@
   /* ─── CONTACT FORM ─── */
   const form = document.getElementById('contactForm');
   const success = document.getElementById('successState');
-  form.addEventListener('submit', e => {
+  form.addEventListener('submit', async e => {
     e.preventDefault();
     const name = form.querySelector('#f-name').value.trim();
     const email = form.querySelector('#f-email').value.trim();
@@ -1370,9 +1370,26 @@
       });
       return;
     }
-    // Demo: hide form, show success. (Brancher sur ton backend / Formspree / N8N webhook.)
-    form.style.display = 'none';
-    success.classList.add('show');
+    const btn = form.querySelector('[type="submit"]');
+    btn.textContent = 'Envoi en cours…';
+    btn.disabled = true;
+    try {
+      const res = await fetch('https://formspree.io/f/mwvzzgqz', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: new FormData(form)
+      });
+      if (res.ok) {
+        form.style.display = 'none';
+        success.classList.add('show');
+      } else {
+        btn.textContent = 'Erreur — réessayez';
+        btn.disabled = false;
+      }
+    } catch {
+      btn.textContent = 'Erreur — réessayez';
+      btn.disabled = false;
+    }
   });
   form.querySelectorAll('input, textarea, select').forEach(f => {
     f.addEventListener('input', () => { f.style.borderColor = ''; });
